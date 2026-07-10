@@ -487,6 +487,10 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
             <option value="-4">Yes</option>
           </select>
         </div>
+        <div class="row2">
+          <div class="field"><label>Note rate %</label><input type="number" id="q-rate" value="6" step="0.25" min="1" max="12"></div>
+          <div class="field"><label>Term (years)</label><input type="number" id="q-term" value="15" step="1" min="5" max="30"></div>
+        </div>
       </div>
       <div class="lbrv lbd1">
         <div class="delta">
@@ -508,7 +512,7 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
           <a class="btn btn-primary btn-sm" href="#market">Browse seller-financed homes</a>
           <a class="btn btn-ghost btn-sm" onclick="openBook()">Talk to a specialist — 15 min</a>
         </div>
-        <p class="fineprint">Informational pre-qualification only — not a credit decision, offer, or commitment. Criteria are financial and collateral-based, applied identically to every applicant. Final terms are set by the individual seller. Assumes 6% / 15-yr note, 1.1% property tax, $200/mo insurance. Formal applications require income and identity verification; consumer reports are used only with your written authorization (FCRA).</p>
+        <p class="fineprint">Informational pre-qualification only — not a credit decision, offer, or commitment. Criteria are financial and collateral-based, applied identically to every applicant. Final terms are set by the individual seller. Uses the note rate and term you enter, plus 1.1% property tax and $200/mo insurance. Formal applications require income and identity verification; consumer reports are used only with your written authorization (FCRA).</p>
       </div>
     </div>
   </div>
@@ -520,23 +524,24 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
     <div class="wrap">
       <div class="sec-head lbrv">
         <div class="kicker">For agents &amp; advisors</div>
-        <h2>Your dead leads are worth $15k each</h2>
+        <h2>Turn "won't sell" clients into closings</h2>
         <p>Every client who says "I won't sell because of taxes" is a listing you never earn. Bring them a seller-financing option and that dead lead becomes a closing — with your commission intact.</p>
       </div>
-      <div class="flow lbrv">
-        <div class="fcard"><div class="t">You earn</div><b>Your listing commission</b><p>It's a normal sale through escrow — your 1–1.5% listing side, paid at closing as always</p></div>
+      <div class="flow lbrv" style="grid-template-columns:1fr auto 1fr">
+        <div class="fcard"><div class="t">You earn</div><b>Your listing commission</b><p>It's a normal sale through escrow — your listing side at the rate you set, paid at closing as always</p></div>
         <div class="arrow">+</div>
         <div class="fcard"><div class="t">Plus</div><b>25% referral share</b><p>Of the LegacyBridge platform fee on every deal you bring</p></div>
-        <div class="arrow">+</div>
-        <div class="fcard"><div class="t">Plus</div><b>The pipeline</b><p>Buyer side if you bring the buyer, and 15 years of referrals from a seller collecting monthly checks</p></div>
       </div>
       <div class="vs lbrv lbd1">
         <div class="vs-card a">
           <h4>Your numbers</h4>
-          <div class="field" style="margin-bottom:14px"><label style="color:#93a39b">Avg. home price in your market</label><input type="number" id="a-price" value="1200000" step="50000" style="background:#0b100e;border-color:rgba(255,255,255,.15);color:#fff"></div>
+          <div class="row2" style="margin-bottom:14px">
+            <div class="field" style="margin-bottom:0"><label style="color:#93a39b">Avg. home price in your market</label><input type="number" id="a-price" value="1200000" step="50000" style="background:#0b100e;border-color:rgba(255,255,255,.15);color:#fff"></div>
+            <div class="field" style="margin-bottom:0"><label style="color:#93a39b">Your listing commission %</label><input type="number" id="a-comm" value="1.25" step="0.25" min="0.25" max="6" style="background:#0b100e;border-color:rgba(255,255,255,.15);color:#fff"><div class="hint" style="color:#7d8d85">You set your own rate</div></div>
+          </div>
           <div class="field"><label style="color:#93a39b">"Won't sell — taxes" clients you could rescue per year: <b id="a-deals-label" style="color:#fff">3</b></label>
           <input type="range" id="a-deals" min="1" max="10" value="3" style="width:100%;accent-color:#00c887"></div>
-          <div class="vs-row"><span>Listing commission (1.25%)</span><b id="a-listing">—</b></div>
+          <div class="vs-row"><span>Listing commission (your rate)</span><b id="a-listing">—</b></div>
           <div class="vs-row"><span>Referral share (25% of platform fee)</span><b id="a-referral">—</b></div>
         </div>
         <div class="vs-card b">
@@ -800,7 +805,8 @@ document.querySelectorAll('#calc input,#calc select').forEach(el=>el.addEventLis
 function agentCalc(){
   const price=parseFloat(document.getElementById('a-price').value)||0;
   const deals=parseInt(document.getElementById('a-deals').value)||1;
-  const listing=price*0.0125, referral=price*0.0175*0.25;
+  const commPct=(parseFloat(document.getElementById('a-comm').value)||1.25)/100;
+  const listing=price*commPct, referral=price*0.0175*0.25;
   document.getElementById('a-deals-label').textContent=deals;
   document.getElementById('a-listing').textContent=fmt(listing)+' each';
   document.getElementById('a-referral').textContent=fmt(referral)+' each';
@@ -817,7 +823,7 @@ function qualify(){
   const v=id=>parseFloat(document.getElementById(id).value)||0;
   const sel=id=>parseInt(document.getElementById(id).value);
   const price=v('q-price'), down=v('q-down'), income=v('q-income'), reserves=v('q-reserves');
-  const RATE=.06, TERM=15, TAXR=.011, INS=200;
+  const RATE=(v('q-rate')||6)/100, TERM=Math.max(1,Math.round(v('q-term')||15)), TAXR=.011, INS=200;
   const loan=Math.max(0,price-down);
   const pi=RATE>0?loan*(RATE/12)/(1-Math.pow(1+RATE/12,-TERM*12)):loan/(TERM*12);
   const piti=pi+price*TAXR/12+INS;
@@ -832,7 +838,7 @@ function qualify(){
   const vals=Object.values(scores);
   const total=vals.reduce((a,b)=>a+b,0);
   const autoDecline=vals.some(s=>s===-4);
-  let result, cls, note, terms='6% · 15 yr';
+  let result, cls, note, terms=(RATE*100).toFixed(2).replace(/\.?0+$/,'')+'% · '+TERM+' yr';
   if(autoDecline){
     const why=[];
     if(scores.collections===-4)why.push('housing collections/evictions');
@@ -927,13 +933,16 @@ function renderListings(){
 
 /* ================= AI CHAT ================= */
 const CANNED=[
+  [/refer|agent|advisor|partner(ing)?|lead/i,"Introducing a homeowner to LegacyBridge is open to anyone. However, transaction-based referral compensation for real estate generally requires a real-estate license under California law — so our paid partner program is designed for licensed agents and financial advisors. If that's you, book a 15-min call to join. If you're not licensed, you can still connect someone directly and they'll thank you. (Education, not legal advice.)"],
+  [/list my|sell my (home|house)|how do i (sell|list|start)/i,"Start with the calculator to model your taxes, then book a free 15-min call. We verify your home is free and clear, you set your terms (down payment, rate, term), we present vetted buyers, and a licensed escrow closes with a promissory note, recorded deed of trust, and title insurance — like a normal sale, minus the bank."],
+  [/escrow|title|closing|paperwork|documents/i,"Closings run through licensed escrow and title companies exactly like a traditional sale: purchase agreement, promissory note, recorded deed of trust, and title insurance. A third-party servicer can collect payments and handle tax reporting (Form 6252). LegacyBridge coordinates; licensed professionals execute."],
   [/453|installment/i,"An installment sale (IRC §453) lets you recognize capital gain proportionally as principal payments arrive, instead of all at once. Each payment is part tax-free return of basis, part gain at capital-gains rates, plus interest (ordinary income) — reported on Form 6252. Spreading gain over 10–20 years often keeps you in the 0%/15% federal bracket and lower CA brackets. (Education, not tax advice.)"],
   [/default|stop|stops paying|foreclos/i,"Your note is secured by a recorded deed of trust — the same instrument banks use. If the buyer defaults, you foreclose (non-judicial in California, typically 4–6 months), keep every payment received including the down payment, and take the property back. That's why buyer screening and a meaningful down payment matter."],
   [/step.?up|basis|inherit|heir/i,"Honest answer: yes, that's the trade-off. Holding until death gives heirs a stepped-up basis (§1014) — zero capital gains. An installment sale recognizes gain as you collect, and remaining payments pass to heirs as income in respect of a decedent. If you want or need to sell during your lifetime, the installment sale is usually the most tax-efficient path. Model both with your CPA."],
   [/legal|dodd|licens/i,"Yes. Installment sales are IRC §453, in the tax code since 1928. Dodd-Frank expressly allows individuals to seller-finance up to 3 properties per year without a mortgage originator license. Every deal here closes through licensed escrow and title with a recorded deed of trust."],
   [/rate|interest|afr|charge/i,"The note must carry at least the IRS Applicable Federal Rate (AFR) to avoid imputed-interest rules. Market seller-financed rates typically run 5.5–7.5%. That interest goes to you instead of a bank — on money that would otherwise have gone to the IRS in year one."],
   [/early|money out|liquidity|sell my note|lump/i,"Two exits: the buyer can refinance later and pay off your note (you recognize the remaining gain then), or you can sell your performing note on the secondary market — seasoned, well-documented notes typically fetch 85–95% of remaining balance. Partial sales are possible too."],
-  [/fee|cost|charge|commission|price/i,"A flat closing fee, typically 1.5–2% of sale price — versus 5–6% traditional agent commissions — plus optional note servicing. Buyers pay a one-time qualification fee. No hidden spreads."],
+  [/fee|cost|charge|commission|price/i,"LegacyBridge charges a flat closing fee, typically 1.5–2% of sale price, plus optional note servicing. Buyers pay a one-time qualification fee. Agent commissions are set by each listing agent and paid through escrow as in any sale. No hidden spreads."],
   [/niit|3\.8/i,"The 3.8% Net Investment Income Tax kicks in above $200k (single) / $250k (married) MAGI. A lump-sum gain almost always triggers it; spreading gain over years often keeps you under the threshold entirely."],
   [/call|talk|human|person|specialist/i,"Happy to connect you — click 'Book a 15-min call' and pick a slot. A specialist will walk your exact numbers, no pressure."]
 ];
@@ -959,7 +968,7 @@ async function sendChat(){
   }catch(e){}
   if(!reply){
     const hit=CANNED.find(([re])=>re.test(q));
-    reply = hit?hit[1]:"I don't have a canned answer for that yet (live AI connects when the backend is deployed). Try the suggested questions — or book a free 15-min call and a specialist will answer anything. Remember: education, not tax advice!";
+    reply = hit?hit[1]:"Good question — I don't have that stored offline. Try asking about §453, buyer defaults, the step-up in basis, legality, fees, interest rates, selling your note, listing your home, closings, or partnering as an agent — or book a free 15-min call and a specialist will answer anything. (Education, not tax advice.)";
   }
   await new Promise(res=>setTimeout(res,450));
   typing.classList.remove('typing');

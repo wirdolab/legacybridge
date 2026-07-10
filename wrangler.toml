@@ -1,0 +1,13 @@
+name = "legacybridge"
+main = "worker.js"
+compatibility_date = "2026-07-01"
+
+[assets]
+directory = "./"
+binding = "ASSETS"
+
+# Secrets (set in dashboard or: wrangler secret put ANTHROPIC_API_KEY)
+# Optional lead/booking storage:
+# [[kv_namespaces]]
+# binding = "LEADS"
+# id = "REPLACE_WITH_KV_ID"
