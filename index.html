@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LegacyBridge — Sell smart. Keep more.</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#fafbfa; --ink:#0b100e; --muted:#5f6b65; --line:#e6eae7;
+  --accent:#00c887; --accent-ink:#00754f; --accent-soft:#e6faf2;
+  --dark:#0b100e; --dark-soft:#141b17; --dark-line:rgba(255,255,255,.08);
+  --r:18px; --r-sm:12px;
+  --shadow:0 1px 2px rgba(11,16,14,.04),0 8px 24px rgba(11,16,14,.05);
+  --shadow-lg:0 4px 12px rgba(11,16,14,.06),0 24px 60px rgba(11,16,14,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-weight:650;letter-spacing:-.02em;line-height:1.12}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.grad{background:linear-gradient(100deg,var(--accent) 0%,#00a0c8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kicker{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink);margin-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:100px;font-size:.95rem;font-weight:600;text-decoration:none;cursor:pointer;border:none;transition:transform .18s,box-shadow .18s,background .18s}
+.btn:hover{transform:translateY(-2px)}
+.btn-primary{background:var(--ink);color:#fff}
+.btn-primary:hover{box-shadow:0 10px 30px rgba(11,16,14,.25)}
+.btn-accent{background:var(--accent);color:#04241a}
+.btn-accent:hover{box-shadow:0 10px 30px rgba(0,200,135,.35)}
+.btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-sm{padding:9px 18px;font-size:.85rem}
+
+/* reveal animations */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.08s}.rv.d2{transition-delay:.16s}.rv.d3{transition-delay:.24s}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:900;background:rgba(250,251,250,.8);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:62px;max-width:1080px;margin:0 auto;padding:0 24px}
+.logo{font-weight:750;font-size:1.05rem;letter-spacing:-.02em;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:8px}
+.logo .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.nav-links{display:flex;gap:2px;list-style:none;align-items:center}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:.88rem;font-weight:500;padding:8px 13px;border-radius:100px;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+@media(max-width:840px){.nav-links a:not(.btn){display:none}}
+
+/* HERO */
+.hero{position:relative;padding:110px 24px 90px;text-align:center;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(600px 300px at 70% 0%,rgba(0,200,135,.10),transparent 70%),
+  radial-gradient(500px 260px at 20% 10%,rgba(0,160,200,.07),transparent 70%);pointer-events:none}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(700px 420px at 50% 0%,rgba(0,0,0,.5),transparent 75%);pointer-events:none}
+.hero h1{font-size:clamp(2.4rem,6vw,4.2rem);max-width:820px;margin:0 auto 22px;position:relative}
+.hero .sub{font-size:1.12rem;color:var(--muted);max-width:560px;margin:0 auto 38px;position:relative}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative}
+.stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:64px;position:relative}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 26px;box-shadow:var(--shadow);min-width:150px}
+.stat b{display:block;font-size:1.6rem;font-weight:700;letter-spacing:-.03em}
+.stat b span{color:var(--accent-ink)}
+.stat small{color:var(--muted);font-size:.78rem}
+
+/* SECTIONS */
+section{padding:88px 0}
+.sec-head{text-align:center;max-width:600px;margin:0 auto 56px}
+.sec-head h2{font-size:clamp(1.7rem,3.4vw,2.4rem);margin-bottom:12px}
+.sec-head p{color:var(--muted)}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.step{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:30px 26px;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;position:relative}
+.step:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.step .n{font-size:.72rem;font-weight:700;color:var(--accent-ink);letter-spacing:.1em;margin-bottom:16px}
+.step h3{font-size:1.05rem;margin-bottom:8px}
+.step p{font-size:.88rem;color:var(--muted)}
+.step svg{width:36px;height:36px;stroke:var(--ink);stroke-width:1.4;fill:none;margin-bottom:16px}
+
+/* EXAMPLE */
+.example{background:var(--dark);color:#eef4f0;border-radius:28px;margin:0 24px}
+.example .wrap{padding-top:80px;padding-bottom:80px}
+.example .kicker{color:var(--accent)}
+.example h2{color:#fff}
+.example .sec-head p{color:#93a39b}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:stretch;margin-bottom:40px}
+@media(max-width:820px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg);margin:6px auto}}
+.fcard{background:var(--dark-soft);border:1px solid var(--dark-line);border-radius:var(--r);padding:26px}
+.fcard .t{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7d8d85;margin-bottom:10px}
+.fcard b{font-size:1.35rem;letter-spacing:-.02em}
+.fcard p{font-size:.84rem;color:#93a39b;margin-top:8px}
+.arrow{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.4rem;padding:0 16px}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+@media(max-width:680px){.vs{grid-template-columns:1fr}}
+.vs-card{border-radius:var(--r);padding:28px;border:1px solid var(--dark-line)}
+.vs-card.a{background:var(--dark-soft)}
+.vs-card.b{background:linear-gradient(160deg,rgba(0,200,135,.14),rgba(0,160,200,.07));border-color:rgba(0,200,135,.35)}
+.vs-card h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:#93a39b;margin-bottom:16px}
+.vs-card .big{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:4px}
+.vs-card.b .big{color:var(--accent)}
+.vs-card small{color:#93a39b}
+.vs-row{display:flex;justify-content:space-between;font-size:.86rem;padding:9px 0;border-bottom:1px dashed var(--dark-line);color:#c3cec8}
+.vs-row b{font-variant-numeric:tabular-nums;color:#fff}
+.example .cta-line{text-align:center;margin-top:40px}
+
+/* CALCULATOR */
+.calc-wrap{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+@media(max-width:920px){.calc-wrap{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow)}
+.panel h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:18px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;padding:11px 13px;border:1.5px solid var(--line);border-radius:10px;font-size:.95rem;background:var(--bg);transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field .hint{font-size:.72rem;color:#9aa69f;margin-top:3px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.delta{background:var(--dark);color:#fff;border-radius:var(--r);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.delta .amt{font-size:1.9rem;font-weight:700;letter-spacing:-.03em;color:var(--accent)}
+.delta small{color:#93a39b;display:block;font-size:.78rem}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:560px){.results{grid-template-columns:1fr}}
+.rcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);position:relative}
+.rcard.win{border-color:rgba(0,200,135,.5);background:linear-gradient(170deg,#fff 60%,var(--accent-soft))}
+.rcard h4{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.rcard .big{font-size:1.7rem;font-weight:700;letter-spacing:-.03em}
+.rcard ul{list-style:none;margin-top:14px;font-size:.84rem}
+.rcard li{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--line);color:var(--muted)}
+.rcard li b{font-variant-numeric:tabular-nums;color:var(--ink)}
+.tag{position:absolute;top:-10px;right:16px;background:var(--accent);color:#04241a;font-size:.68rem;font-weight:700;padding:3px 12px;border-radius:100px;letter-spacing:.05em}
+.offset{margin-top:16px;background:var(--accent-soft);border:1px solid rgba(0,200,135,.4);border-radius:12px;padding:12px 15px;font-size:.82rem;line-height:1.55;color:var(--accent-ink)}
+.offset b{font-weight:750}
+.offset-dark{background:rgba(0,200,135,.1);border-color:rgba(0,200,135,.3);color:#a8dcc6}
+.offset-dark b{color:var(--accent)}
+.chart-box{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.chart-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px;font-weight:600}
+#chart svg{width:100%;height:auto;display:block}
+.chart-legend{display:flex;gap:20px;justify-content:center;margin-top:12px;font-size:.76rem;color:var(--muted);flex-wrap:wrap}
+.chart-legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.chart-legend i.dash{background:repeating-linear-gradient(90deg,#b9c2bd 0 4px,transparent 4px 8px);height:2px}
+details.sched-d summary{cursor:pointer;font-size:.85rem;font-weight:600;color:var(--accent-ink);margin-top:14px;list-style:none}
+details.sched-d summary::before{content:"→ "}
+.sched-wrap{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);margin-top:12px;background:#fff}
+table.sched{width:100%;border-collapse:collapse;font-size:.78rem}
+table.sched th{background:var(--bg);padding:8px 10px;text-align:right;position:sticky;top:0;font-weight:600;color:var(--muted)}
+table.sched th:first-child,table.sched td:first-child{text-align:left}
+table.sched td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.fineprint{font-size:.74rem;color:#9aa69f;margin-top:16px;line-height:1.6}
+
+/* MARKET */
+.market-wrap{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+@media(max-width:920px){.market-wrap{grid-template-columns:1fr}}
+#map{height:480px;border-radius:var(--r);border:1px solid var(--line);z-index:1}
+.listing{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s,transform .15s;box-shadow:var(--shadow)}
+.listing:hover,.listing.active{border-color:var(--accent);transform:translateX(3px)}
+.listing .price{font-weight:700;font-size:1.1rem;letter-spacing:-.02em}
+.listing .addr{font-size:.82rem;color:var(--muted)}
+.pill{font-size:.68rem;background:var(--bg);border:1px solid var(--line);color:var(--muted);padding:2px 10px;border-radius:100px;font-weight:600}
+.pill.g{background:var(--accent-soft);border-color:transparent;color:var(--accent-ink)}
+.terms{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.listings-col{max-height:480px;overflow:auto;padding-right:2px}
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.filter-bar select{padding:9px 14px;border-radius:100px;border:1.5px solid var(--line);background:#fff;font-size:.85rem;color:var(--ink)}
+
+/* ASK / CHAT */
+.ask{background:linear-gradient(180deg,var(--bg),var(--accent-soft) 140%)}
+.ask-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+@media(max-width:880px){.ask-grid{grid-template-columns:1fr}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.chip{background:#fff;border:1.5px solid var(--line);border-radius:100px;padding:9px 16px;font-size:.83rem;cursor:pointer;transition:border-color .15s,transform .15s;font-weight:500}
+.chip:hover{border-color:var(--accent);transform:translateY(-2px)}
+.chatbox{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-lg);overflow:hidden;display:flex;flex-direction:column;height:440px}
+.chat-head{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.chat-head .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.chat-head b{font-size:.9rem}
+.chat-head small{color:var(--muted);font-size:.72rem;margin-left:auto}
+#chat-log{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:11px 15px;border-radius:16px;font-size:.86rem;line-height:1.55;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}}
+.msg.bot{background:var(--bg);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
+.msg.user{background:var(--ink);color:#fff;align-self:flex-end;border-bottom-right-radius:5px}
+.msg.typing{color:var(--muted);font-style:italic}
+.chat-input{display:flex;border-top:1px solid var(--line)}
+.chat-input input{flex:1;border:none;padding:15px 18px;font-size:.9rem;outline:none;background:#fff}
+.chat-input button{border:none;background:var(--accent);color:#04241a;padding:0 22px;cursor:pointer;font-size:1rem;font-weight:700}
+
+/* BOOK CTA + MODAL */
+.book-band{text-align:center;padding:80px 24px}
+.book-band h2{font-size:clamp(1.7rem,3.4vw,2.3rem);margin-bottom:10px}
+.book-band p{color:var(--muted);max-width:460px;margin:0 auto 30px}
+.modal-bg{position:fixed;inset:0;background:rgba(11,16,14,.5);backdrop-filter:blur(4px);z-index:1500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:24px;max-width:460px;width:100%;padding:32px;box-shadow:var(--shadow-lg);animation:pop .25s ease;max-height:90vh;overflow:auto}
+.modal h3{font-size:1.25rem;margin-bottom:4px}
+.modal .sub{font-size:.86rem;color:var(--muted);margin-bottom:20px}
+.slot-days{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.slot-times{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.slot{border:1.5px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 6px;font-size:.8rem;text-align:center;cursor:pointer;font-weight:600;transition:all .12s}
+.slot:hover{border-color:var(--accent)}
+.slot.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.modal input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:.95rem;margin-bottom:14px;background:var(--bg)}
+.modal input:focus{outline:none;border-color:var(--accent)}
+.modal .close{position:absolute;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);right:22px;margin-top:-6px}
+.modal-wrap{position:relative}
+.ok-msg{color:var(--accent-ink);font-size:.88rem;font-weight:600;text-align:center;margin-top:6px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--line);padding:48px 24px 40px;font-size:.78rem;color:#9aa69f}
+footer .top{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;max-width:1080px;margin:0 auto 26px}
+footer .disclaimer{max-width:1080px;margin:0 auto;line-height:1.7}
+footer a{color:var(--muted);text-decoration:none;margin-left:18px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#top"><span class="dot"></span>LegacyBridge</a>
+    <ul class="nav-links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#example">Example</a></li>
+      <li><a href="#calc">Calculator</a></li>
+      <li><a href="#market">Marketplace</a></li>
+      <li><a href="#qualify">Buyers</a></li>
+      <li><a href="#ask">Ask AI</a></li>
+      <li><a class="btn btn-accent btn-sm" onclick="openBook()">Book a 10-min call</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="grid-bg"></div>
+  <h1 class="rv">Sell your home.<br>Keep <span class="grad">more of what you built.</span></h1>
+  <p class="sub rv d1">Seller financing under IRC §453 spreads your capital gains over 10–20 years — lower brackets, no bank, and you earn the interest.</p>
+  <div class="hero-cta rv d2">
+    <a class="btn btn-primary" href="#calc">Calculate my savings</a>
+    <a class="btn btn-ghost" onclick="openBook()">Book a 10-min call</a>
+  </div>
+  <div class="stats rv d3">
+    <div class="stat"><b data-count="203" data-prefix="$" data-suffix="k">$0</b><small>typical gain-tax saved*</small></div>
+    <div class="stat"><b><span data-count="28" data-suffix="%">0%</span> → <span style="color:var(--accent-ink)" data-count="7" data-suffix="%">0%</span></b><small>effective tax on gain*</small></div>
+    <div class="stat"><b data-count="0">0</b><small>banks involved</small></div>
+  </div>
+</header>
+
+<!-- HOW -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="kicker">How it works</div>
+      <h2>Three steps. No bank.</h2>
+      <p>You become the lender. The buyer pays you directly — secured by the home itself.</p>
+    </div>
+    <div class="steps">
+      <div class="step rv">
+        <svg viewBox="0 0 24 24"><path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6"/></svg>
+        <div class="n">STEP 01</div>
+        <h3>Model your taxes</h3>
+        <p>See your exact scenario: traditional sale vs. installment sale, year by year, with 2026 federal + California rates.</p>
+      </div>
+      <div class="step rv d1">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5S13.9 16 14.5 19"/><path d="M16 5l4 4M20 5l-4 4"  transform="translate(1,4)"/><path d="M15.5 11.5l2.5 2.5 4.5-4.5"/></svg>
+        <div class="n">STEP 02</div>
+        <h3>Match with a vetted buyer</h3>
+        <p>We pre-screen buyers on real cash flow — income, employment, bank history. You approve who you finance.</p>
+      </div>
+      <div class="step rv d2">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M3.5 10h17M8 15h4"/></svg>
+        <div class="n">STEP 03</div>
+        <h3>Close &amp; collect</h3>
+        <p>Promissory note, recorded deed of trust, title insurance — all done through escrow like a normal sale. Third-party servicing available. Payments land monthly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXAMPLE -->
+<section id="example" style="padding-top:0">
+  <div class="example">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div class="kicker">A real example</div>
+        <h2>María, 68 — Pasadena</h2>
+        <p>Bought in 1985 for $250k + $50k improvements. Home worth $1.8M today, fully paid off. Married filing jointly, $60k retirement income.</p>
+      </div>
+      <div class="flow rv">
+        <div class="fcard"><div class="t">She sells at</div><b>$1,800,000</b><p>15% down · 6% interest · 15-year note</p></div>
+        <div class="arrow">→</div>
+        <div class="fcard"><div class="t">Buyer pays her</div><b>$12,865/mo</b><p>Principal + interest, secured by deed of trust on the home</p></div>
+        <div class="arrow">→</div>
+        <div class="fcard"><div class="t">Gain recognized</div><b>~1/15 per year</b><p>Stays in low brackets · reported on Form 6252</p></div>
+      </div>
+      <div class="vs rv d1">
+        <div class="vs-card a">
+          <h4>Traditional sale</h4>
+          <div class="big">$273,294</div>
+          <small>total tax, all in year one</small>
+          <div style="margin-top:16px">
+            <div class="vs-row"><span>Federal capital gains</span><b>$152,840</b></div>
+            <div class="vs-row"><span>NIIT 3.8%</span><b>$29,412</b></div>
+            <div class="vs-row"><span>California</span><b>$91,042</b></div>
+            <div class="vs-row"><span>Effective rate on gain</span><b>28.3%</b></div>
+          </div>
+        </div>
+        <div class="vs-card b">
+          <h4>Installment sale</h4>
+          <div class="big">$70,227</div>
+          <small>total tax on the same gain, spread over 15 years</small>
+          <div style="margin-top:16px">
+            <div class="vs-row"><span>Effective rate on gain</span><b>7.3%</b></div>
+            <div class="vs-row"><span>Gain-tax saved</span><b>$203,067</b></div>
+            <div class="vs-row"><span>Interest she earns (after tax)</span><b>+$563,419</b></div>
+            <div class="vs-row"><span>Banks involved</span><b>0</b></div>
+          </div>
+          <div class="offset offset-dark">On top of the sale price, María earns <b>$563,419</b> of after-tax interest — 8× her total tax bill of $70,227. The interest doesn't just offset the taxes she pays; it leaves her <b>+$493,192 ahead</b>.</div>
+        </div>
+      </div>
+      <div class="cta-line rv d2">
+        <a class="btn btn-accent" href="#calc">Run it with your numbers</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section id="calc">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="kicker">Calculator</div>
+      <h2>Your numbers, both paths</h2>
+      <p>Edit anything — results update live. Illustrative 2026 federal + California rates.</p>
+    </div>
+    <div class="calc-wrap">
+      <div class="panel rv">
+        <h3>Your scenario</h3>
+        <div class="field"><label>Sale price</label><input type="number" id="c-price" value="1800000" step="10000"></div>
+        <div class="row2">
+          <div class="field"><label>Purchase price</label><input type="number" id="c-basis" value="250000" step="10000"></div>
+          <div class="field"><label>Improvements</label><input type="number" id="c-improve" value="50000" step="5000"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Selling costs %</label><input type="number" id="c-sellcost" value="2" step="0.5" min="0" max="10"></div>
+          <div class="field"><label>Filing status</label><select id="c-status"><option value="mfj">Married joint</option><option value="single">Single</option></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Primary residence</label><select id="c-primary"><option value="1">Yes (§121)</option><option value="0">No</option></select></div>
+          <div class="field"><label>Other income /yr</label><input type="number" id="c-income" value="60000" step="5000"></div>
+        </div>
+        <h3 style="margin-top:20px">Note terms</h3>
+        <div class="row2">
+          <div class="field"><label>Down payment %</label><input type="number" id="c-down" value="15" step="5" min="0" max="50"></div>
+          <div class="field"><label>Term (years)</label><input type="number" id="c-term" value="15" step="1" min="5" max="30"></div>
+        </div>
+        <div class="field"><label>Interest rate %</label><input type="number" id="c-rate" value="6" step="0.25" min="1" max="12"><div class="hint">Must meet IRS minimum (AFR) · typical 5.5–7.5%</div></div>
+      </div>
+
+      <div class="rv d1">
+        <div class="delta">
+          <div><small>Total advantage of seller financing</small><div class="amt" id="r-delta">—</div></div>
+          <a class="btn btn-accent btn-sm" onclick="openBook()">Talk it through — 10 min</a>
+        </div>
+        <div class="results">
+          <div class="rcard">
+            <h4>Traditional sale</h4>
+            <div class="big" id="r-trad-net">—</div>
+            <ul>
+              <li>Taxable gain <b id="r-trad-gain">—</b></li>
+              <li>Federal tax <b id="r-trad-fed">—</b></li>
+              <li>NIIT 3.8% <b id="r-trad-niit">—</b></li>
+              <li>California <b id="r-trad-ca">—</b></li>
+              <li>Total tax <b id="r-trad-tax">—</b></li>
+              <li>Effective rate on gain <b id="r-trad-rate">—</b></li>
+            </ul>
+          </div>
+          <div class="rcard win">
+            <span class="tag">SELLER FINANCED</span>
+            <h4>Installment sale</h4>
+            <div class="big" id="r-inst-net">—</div>
+            <ul>
+              <li>Tax on your gain <b id="r-inst-tax">—</b></li>
+              <li>Gain-tax saved <b id="r-inst-saved">—</b></li>
+              <li>Effective rate on gain <b id="r-inst-rate">—</b></li>
+              <li>Interest earned (after tax) <b id="r-inst-int">—</b></li>
+              <li>Payment to you <b id="r-inst-pmt">—</b></li>
+            </ul>
+            <div class="offset" id="r-inst-offset">—</div>
+          </div>
+        </div>
+        <div class="chart-box">
+          <div class="chart-title">Cumulative after-tax cash received</div>
+          <div id="chart"></div>
+          <div class="chart-legend">
+            <span><i style="background:var(--accent)"></i>Seller financed — cumulative</span>
+            <span><i class="dash"></i>Traditional sale — net, year 1</span>
+          </div>
+        </div>
+        <details class="sched-d">
+          <summary>Year-by-year schedule</summary>
+          <div class="sched-wrap"><table class="sched" id="sched"></table></div>
+        </details>
+        <p class="fineprint">Illustrative only — not tax advice. 2026 federal LTCG brackets (0/15/20%), 3.8% NIIT, CA brackets up to 13.3% incl. mental-health surtax. Interest taxed as ordinary income. Ignores time value of money, depreciation recapture, AMT, §453A (>$5M notes). §121 excludes up to $250k/$500k on a primary residence. Consult your CPA.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETPLACE -->
+<section id="market" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="kicker">Marketplace</div>
+      <h2>Homes with financing built in</h2>
+      <p>Demo listings — free-and-clear homes whose owners offer terms. Buyers qualify on real cash flow, not just FICO.</p>
+    </div>
+    <div class="filter-bar rv">
+      <select id="f-price" onchange="renderListings()">
+        <option value="0">Any price</option><option value="1000000">Under $1M</option>
+        <option value="2000000">Under $2M</option><option value="3000000">Under $3M</option>
+      </select>
+      <select id="f-down" onchange="renderListings()">
+        <option value="100">Any down payment</option><option value="10">≤ 10% down</option>
+        <option value="15">≤ 15% down</option><option value="20">≤ 20% down</option>
+      </select>
+      <select id="f-term" onchange="renderListings()">
+        <option value="0">Any term</option><option value="10">10+ yrs</option>
+        <option value="15">15+ yrs</option><option value="20">20+ yrs</option>
+      </select>
+    </div>
+    <div class="market-wrap rv d1">
+      <div class="listings-col" id="listings"></div>
+      <div id="map"></div>
+    </div>
+  </div>
+</section>
+
+<!-- BUYER QUALIFICATION -->
+<section id="qualify">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="kicker">For buyers</div>
+      <h2>See if you'd qualify — in 60 seconds</h2>
+      <p>No bank, no FICO gatekeeping. We score real cash flow: income, down payment, reserves, payment history. Anonymous — nothing is stored.</p>
+    </div>
+    <div class="calc-wrap">
+      <div class="panel rv">
+        <h3>Your profile</h3>
+        <div class="row2">
+          <div class="field"><label>Target home price</label><input type="number" id="q-price" value="950000" step="10000"></div>
+          <div class="field"><label>Down payment you have</label><input type="number" id="q-down" value="150000" step="5000"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Gross monthly income</label><input type="number" id="q-income" value="20000" step="500"></div>
+          <div class="field"><label>Reserves after closing</label><input type="number" id="q-reserves" value="60000" step="5000"><div class="hint">Savings left after down payment + closing</div></div>
+        </div>
+        <div class="field"><label>Credit score range</label>
+          <select id="q-credit">
+            <option value="5">750+</option><option value="4">700–749</option>
+            <option value="3" selected>650–699</option><option value="2">620–649</option>
+            <option value="1">600–619</option><option value="-4">Below 600</option>
+          </select>
+        </div>
+        <div class="field"><label>Housing payment history (rent or mortgage)</label>
+          <select id="q-history">
+            <option value="5">Verified — 0 late payments in 24 months</option>
+            <option value="4" selected>Private landlord, verifiable — 0 lates</option>
+            <option value="3">Verified — 1 late in 24 months</option>
+            <option value="1">Hard to verify / thin history</option>
+            <option value="-4">Records don't match / can't document</option>
+          </select>
+        </div>
+        <div class="field"><label>Income stability</label>
+          <select id="q-stability">
+            <option value="5" selected>2+ yrs same employer or field (or 2yr returns, self-employed)</option>
+            <option value="3">1–2 years, stable field</option>
+            <option value="2">New job, same field</option>
+            <option value="1">Under 1 year / probationary</option>
+            <option value="-4">Can't document income</option>
+          </select>
+        </div>
+        <div class="field"><label>Housing collections or evictions</label>
+          <select id="q-collections">
+            <option value="5" selected>None</option>
+            <option value="-4">Yes</option>
+          </select>
+        </div>
+      </div>
+      <div class="rv d1">
+        <div class="delta">
+          <div><small>Qualification score</small><div class="amt"><span id="q-score">—</span><span style="font-size:1rem;color:#93a39b"> / 35</span></div></div>
+          <div style="text-align:right"><small>Assumed note terms</small><div style="font-size:.9rem;font-weight:600" id="q-terms">—</div></div>
+        </div>
+        <div class="rcard" id="q-result-card">
+          <h4>Result</h4>
+          <div class="big" id="q-result">—</div>
+          <ul>
+            <li>Monthly payment (P&amp;I + taxes + insurance) <b id="q-piti">—</b></li>
+            <li>Income coverage of payment <b id="q-coverage">—</b></li>
+            <li>Down payment <b id="q-downpct">—</b></li>
+            <li>Reserves <b id="q-resmo">—</b></li>
+          </ul>
+          <div class="offset" id="q-note">—</div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-primary btn-sm" href="#market">Browse seller-financed homes</a>
+          <a class="btn btn-ghost btn-sm" onclick="openBook()">Talk to a specialist — 10 min</a>
+        </div>
+        <p class="fineprint">Informational pre-qualification only — not a credit decision, offer, or commitment. Criteria are financial and collateral-based, applied identically to every applicant. Final terms are set by the individual seller. Assumes 6% / 15-yr note, 1.1% property tax, $200/mo insurance. Formal applications require income and identity verification; consumer reports are used only with your written authorization (FCRA).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ASK AI -->
+<section id="ask" class="ask">
+  <div class="wrap">
+    <div class="ask-grid">
+      <div class="rv">
+        <div class="kicker">Do you know how it works?</div>
+        <h2 style="font-size:clamp(1.7rem,3.2vw,2.3rem);margin-bottom:14px">Ask anything.<br>Get a straight answer.</h2>
+        <p style="color:var(--muted)">Seller financing raises real questions — defaults, the step-up in basis, what your CPA will say. Our AI assistant answers them in plain language. And when you're ready, a specialist will walk your exact numbers in 10 minutes.</p>
+        <div class="chips">
+          <div class="chip" onclick="askChip(this)">What if the buyer stops paying?</div>
+          <div class="chip" onclick="askChip(this)">Don't my heirs lose the step-up in basis?</div>
+          <div class="chip" onclick="askChip(this)">Is this legal?</div>
+          <div class="chip" onclick="askChip(this)">What interest rate do I have to charge?</div>
+          <div class="chip" onclick="askChip(this)">Can I get my money out early?</div>
+          <div class="chip" onclick="askChip(this)">What does it cost?</div>
+        </div>
+        <div style="margin-top:30px">
+          <a class="btn btn-primary" onclick="openBook()">Book a free 10-min call</a>
+        </div>
+      </div>
+      <div class="chatbox rv d1">
+        <div class="chat-head"><span class="dot"></span><b>LegacyBridge AI</b><small>education, not tax advice</small></div>
+        <div id="chat-log"></div>
+        <div class="chat-input">
+          <input id="chat-in" placeholder="Type your question…" onkeydown="if(event.key==='Enter')sendChat()">
+          <button onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOK BAND -->
+<section class="book-band" style="padding-top:40px">
+  <div class="rv">
+    <h2>10 minutes. Your numbers. <span class="grad">Zero pressure.</span></h2>
+    <p>A specialist walks through your scenario, answers your CPA's questions, and tells you honestly if this isn't for you.</p>
+    <a class="btn btn-accent" onclick="openBook()">Pick a time</a>
+  </div>
+</section>
+
+<!-- BOOKING MODAL -->
+<div class="modal-bg" id="book-modal" onclick="if(event.target===this)closeBook()">
+  <div class="modal modal-wrap">
+    <button class="close" onclick="closeBook()">✕</button>
+    <h3>Book your 10-min call</h3>
+    <p class="sub">Free, no obligation. We'll email you a confirmation.</p>
+    <div class="slot-days" id="book-days"></div>
+    <div class="slot-times" id="book-times"></div>
+    <input type="email" id="book-email" placeholder="you@email.com">
+    <input type="text" id="book-name" placeholder="Your name (optional)">
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="submitBooking()">Confirm booking</button>
+    <div class="ok-msg" id="book-msg"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="top">
+    <a class="logo" href="#top"><span class="dot"></span>LegacyBridge</a>
+    <div>
+      <a href="#how">How it works</a><a href="#calc">Calculator</a><a href="#market">Marketplace</a><a href="#ask">Ask AI</a>
+    </div>
+  </div>
+  <div class="disclaimer">
+    *Example figures based on the María scenario above; results vary. <b>Important disclosures.</b> LegacyBridge is a technology marketplace that introduces sellers and buyers and coordinates independent licensed third parties (escrow, title, note servicing). LegacyBridge is not a lender, mortgage broker, loan originator, law firm, CPA firm, or investment adviser, and does not originate, fund, or guarantee any loan. Calculator outputs are estimates for illustration only. Nothing on this site is tax, legal, or investment advice — consult your own CPA and attorney. Seller financing involves risk, including buyer default and foreclosure costs. Sellers are responsible for Dodd-Frank seller-financing limits and applicable state law. Marketplace listings shown are fictitious demo data.
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ================= TAX ENGINE (2026, illustrative) ================= */
+const TAX = {
+  stdDed:{single:16100, mfj:32200},
+  ordinary:{
+    single:[[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[640600,.35],[Infinity,.37]],
+    mfj:[[24800,.10],[100800,.12],[211400,.22],[403550,.24],[512450,.32],[768700,.35],[Infinity,.37]]
+  },
+  ltcg:{ single:{t15:49450,t20:545500}, mfj:{t15:98900,t20:613700} },
+  niit:{rate:.038, magi:{single:200000, mfj:250000}},
+  caStdDed:{single:5540, mfj:11080},
+  ca:{
+    single:[[10756,.01],[25499,.02],[40245,.04],[55866,.06],[70606,.08],[360659,.093],[432787,.103],[721314,.113],[Infinity,.123]],
+    mfj:[[21512,.01],[50998,.02],[80490,.04],[111732,.06],[141212,.08],[721318,.093],[865574,.103],[1442628,.113],[Infinity,.123]]
+  },
+  caMH:{threshold:1000000, rate:.01}
+};
+function bracketTax(taxable, brackets){
+  let tax=0, prev=0;
+  for(const [cap,rate] of brackets){
+    if(taxable<=prev) break;
+    tax += (Math.min(taxable,cap)-prev)*rate;
+    prev=cap;
+  }
+  return Math.max(0,tax);
+}
+function fedTax(ordinary, ltcg, status){
+  const taxOrd = Math.max(0, ordinary - TAX.stdDed[status]);
+  const ordTax = bracketTax(taxOrd, TAX.ordinary[status]);
+  const {t15,t20} = TAX.ltcg[status];
+  const gStart = taxOrd, gEnd = taxOrd + Math.max(0,ltcg);
+  const slice=(a,b)=>Math.max(0,Math.min(gEnd,b)-Math.max(gStart,a));
+  return ordTax + slice(t15,t20)*.15 + slice(t20,Infinity)*.20;
+}
+function niitTax(otherIncome, investmentIncome, status){
+  const excess = Math.max(0, otherIncome + investmentIncome - TAX.niit.magi[status]);
+  return TAX.niit.rate * Math.min(investmentIncome, excess);
+}
+function caTax(income, status){
+  const taxable = Math.max(0, income - TAX.caStdDed[status]);
+  let t = bracketTax(taxable, TAX.ca[status]);
+  if(taxable > TAX.caMH.threshold) t += (taxable-TAX.caMH.threshold)*TAX.caMH.rate;
+  return t;
+}
+function yearTax(otherIncome, interestIncome, gain, status){
+  const fed = fedTax(otherIncome+interestIncome, gain, status) - fedTax(otherIncome,0,status);
+  const niit = niitTax(otherIncome, interestIncome+gain, status);
+  const ca = caTax(otherIncome+interestIncome+gain,status) - caTax(otherIncome,status);
+  return {fed, niit, ca, total:fed+niit+ca};
+}
+const fmt = n => (n<0?'-':'')+'$'+Math.abs(Math.round(n)).toLocaleString();
+const pct = n => (n*100).toFixed(1)+'%';
+
+function calc(){
+  const v = id => parseFloat(document.getElementById(id).value)||0;
+  const price=v('c-price'), basis=v('c-basis')+v('c-improve');
+  const sellCost=price*v('c-sellcost')/100;
+  const status=document.getElementById('c-status').value;
+  const primary=document.getElementById('c-primary').value==='1';
+  const otherInc=v('c-income');
+  const downPct=v('c-down')/100, term=Math.max(1,Math.round(v('c-term'))), rate=v('c-rate')/100;
+
+  const amountRealized = price - sellCost;
+  const rawGain = Math.max(0, amountRealized - basis);
+  const exclusion = primary ? Math.min(rawGain, status==='mfj'?500000:250000) : 0;
+  const gain = rawGain - exclusion;
+
+  const t = yearTax(otherInc, 0, gain, status);
+  const tradNet = amountRealized - t.total;
+
+  const contractPrice = amountRealized;
+  const gpr = contractPrice>0 ? gain/contractPrice : 0;
+  const down = contractPrice*downPct;
+  const notePrincipal = contractPrice - down;
+  const pmt = rate>0 ? notePrincipal*rate/(1-Math.pow(1+rate,-term)) : notePrincipal/term;
+
+  let bal=notePrincipal, rows=[], totTax=0, totInt=0, taxGainOnly=0, cum=0, sInst=[], sTrad=[];
+  for(let y=1;y<=term;y++){
+    const interest = bal*rate;
+    let principal = Math.min(bal, pmt-interest);
+    if(y===term) principal = bal;
+    const pr = principal + (y===1?down:0);
+    const gainRec = pr*gpr;
+    const tx = yearTax(otherInc, interest, gainRec, status);
+    totTax+=tx.total; totInt+=interest;
+    taxGainOnly += yearTax(otherInc, 0, gainRec, status).total;
+    cum += pr + interest - tx.total;
+    bal -= principal;
+    rows.push({y, principal:pr, interest, gainRec, tax:tx.total, cum});
+    sInst.push(cum); sTrad.push(tradNet);
+  }
+  const instNet = cum;
+  const afterTaxInt = totInt - (totTax - taxGainOnly);
+  const delta = instNet - tradNet;
+
+  const put=(id,val)=>document.getElementById(id).textContent=val;
+  put('r-delta', (delta>=0?'+':'')+fmt(delta));
+  put('r-trad-net', fmt(tradNet));
+  put('r-trad-gain', fmt(gain));
+  put('r-trad-fed', fmt(t.fed));
+  put('r-trad-niit', fmt(t.niit));
+  put('r-trad-ca', fmt(t.ca));
+  put('r-trad-tax', fmt(t.total));
+  put('r-trad-rate', gain>0?pct(t.total/gain):'0%');
+  put('r-inst-net', fmt(instNet));
+  put('r-inst-tax', fmt(taxGainOnly));
+  put('r-inst-saved', fmt(t.total-taxGainOnly));
+  put('r-inst-rate', gain>0?pct(taxGainOnly/gain):'0%');
+  put('r-inst-int', fmt(afterTaxInt));
+  put('r-inst-pmt', fmt(pmt/12)+'/mo');
+  // Interest vs. tax offset highlight
+  const offsetEl = document.getElementById('r-inst-offset');
+  const netOffset = afterTaxInt - taxGainOnly;
+  if(netOffset >= 0){
+    const mult = taxGainOnly>0 ? (afterTaxInt/taxGainOnly) : null;
+    offsetEl.innerHTML = `Your after-tax interest of <b>${fmt(afterTaxInt)}</b>${mult&&mult>=1.5?` (${mult>=10?Math.round(mult):mult.toFixed(1)}× your tax bill)`:''} doesn't just offset the <b>${fmt(taxGainOnly)}</b> tax on your gain — it leaves you <b>${fmt(netOffset)} ahead</b>.`;
+  } else {
+    offsetEl.innerHTML = `Your after-tax interest of <b>${fmt(afterTaxInt)}</b> offsets ${fmt(afterTaxInt)} of your <b>${fmt(taxGainOnly)}</b> gain tax.`;
+  }
+
+  let html='<thead><tr><th>Yr</th><th>Principal</th><th>Interest</th><th>Gain recognized</th><th>Tax</th><th>Cumulative net</th></tr></thead><tbody>';
+  rows.forEach(r=>{html+=`<tr><td>${r.y}</td><td>${fmt(r.principal)}</td><td>${fmt(r.interest)}</td><td>${fmt(r.gainRec)}</td><td>${fmt(r.tax)}</td><td>${fmt(r.cum)}</td></tr>`});
+  document.getElementById('sched').innerHTML=html+'</tbody>';
+
+  drawChart(sInst, tradNet, term);
+}
+
+/* Dependency-free SVG chart */
+function drawChart(series, tradNet, term){
+  const W=720, H=240, padL=56, padR=14, padT=14, padB=28;
+  const pts=[0, ...series];
+  const maxY=Math.max(tradNet, series[series.length-1]||0)*1.08 || 1;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  const X=i=>padL+iw*i/(pts.length-1);
+  const Y=v=>padT+ih*(1-v/maxY);
+  let line='', area=`M ${X(0)} ${Y(0)}`;
+  pts.forEach((v,i)=>{const cmd=i?'L':'M'; line+=`${cmd} ${X(i).toFixed(1)} ${Y(v).toFixed(1)} `;});
+  pts.forEach((v,i)=>{area+=` L ${X(i).toFixed(1)} ${Y(v).toFixed(1)}`;});
+  area+=` L ${X(pts.length-1).toFixed(1)} ${Y(0).toFixed(1)} Z`;
+  // gridlines: 4 horizontal
+  let grid='', yLabels='';
+  for(let g=0;g<=4;g++){
+    const v=maxY*g/4, y=Y(v).toFixed(1);
+    grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#eef1ef" stroke-width="1"/>`;
+    yLabels+=`<text x="${padL-8}" y="${(+y+3.5)}" text-anchor="end" font-size="10" fill="#9aa69f">$${(v/1000000).toFixed(1)}M</text>`;
+  }
+  // x labels: ~6 ticks
+  let xLabels='';
+  const stepX=Math.max(1,Math.ceil(term/6));
+  for(let y=0;y<=term;y+=stepX){
+    xLabels+=`<text x="${X(y).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#9aa69f">${y===0?'Now':'Yr '+y}</text>`;
+  }
+  const yT=Y(tradNet).toFixed(1);
+  const crossIdx=pts.findIndex(v=>v>=tradNet);
+  const cross = crossIdx>0 ? `<circle cx="${X(crossIdx).toFixed(1)}" cy="${Y(pts[crossIdx]).toFixed(1)}" r="4.5" fill="#00c887" stroke="#fff" stroke-width="2"/><text x="${X(crossIdx).toFixed(1)}" y="${(Y(pts[crossIdx])-10).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="#00754f">passes traditional — Yr ${crossIdx}</text>` : '';
+  document.getElementById('chart').innerHTML=
+    `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cumulative after-tax cash: seller financed vs traditional">
+      ${grid}${yLabels}${xLabels}
+      <line x1="${padL}" y1="${yT}" x2="${W-padR}" y2="${yT}" stroke="#b9c2bd" stroke-width="1.5" stroke-dasharray="5 5"/>
+      <path d="${area}" fill="rgba(0,200,135,.08)"/>
+      <path d="${line}" fill="none" stroke="#00c887" stroke-width="2.5" stroke-linecap="round"/>
+      ${cross}
+    </svg>`;
+}
+document.querySelectorAll('#calc input,#calc select').forEach(el=>el.addEventListener('input',calc));
+
+/* ================= BUYER QUALIFICATION ================= */
+/* Same rubric as the Buyer Qualification Score Sheet (xlsx). 7 criteria, max 35, any -4 = auto decline. */
+function bandCoverage(x){ return x>=3?5 : x>=2.75?4 : x>=2.5?3 : x>=2.25?2 : x>=2?1 : -4; }
+function bandDown(x){ return x>=.20?5 : x>=.15?4 : x>=.125?3 : x>=.10?2 : -4; }
+function bandReserves(mo){ return mo>=12?5 : mo>=9?4 : mo>=6?3 : mo>=3?2 : mo>=1?1 : -4; }
+function qualify(){
+  const v=id=>parseFloat(document.getElementById(id).value)||0;
+  const sel=id=>parseInt(document.getElementById(id).value);
+  const price=v('q-price'), down=v('q-down'), income=v('q-income'), reserves=v('q-reserves');
+  const RATE=.06, TERM=15, TAXR=.011, INS=200;
+  const loan=Math.max(0,price-down);
+  const pi=RATE>0?loan*(RATE/12)/(1-Math.pow(1+RATE/12,-TERM*12)):loan/(TERM*12);
+  const piti=pi+price*TAXR/12+INS;
+  const coverage=piti>0?income/piti:0;
+  const downPct=price>0?down/price:0;
+  const resMo=piti>0?reserves/piti:0;
+  const scores={
+    collections:sel('q-collections'), credit:sel('q-credit'),
+    coverage:bandCoverage(coverage), down:bandDown(downPct),
+    reserves:bandReserves(resMo), history:sel('q-history'), stability:sel('q-stability')
+  };
+  const vals=Object.values(scores);
+  const total=vals.reduce((a,b)=>a+b,0);
+  const autoDecline=vals.some(s=>s===-4);
+  let result, cls, note, terms='6% · 15 yr';
+  if(autoDecline){
+    const why=[];
+    if(scores.collections===-4)why.push('housing collections/evictions');
+    if(scores.coverage===-4)why.push('income under 2x the payment');
+    if(scores.down===-4)why.push('down payment under 10%');
+    if(scores.credit===-4)why.push('credit below 600');
+    if(scores.history===-4)why.push('unverifiable payment history');
+    if(scores.stability===-4)why.push('unverifiable income');
+    if(scores.reserves===-4)why.push('under 1 month reserves');
+    result='Not yet'; cls='decline';
+    note='Blocking issue: '+why.join('; ')+'. Fix that and re-check — many buyers qualify within months by adjusting price target or building reserves.';
+  } else if(total>=31){ result='Strong — qualify at advertised terms'; cls='win'; note='You\'d be presented to sellers at their listed down payment and rate. Verification of income, funds, and history comes next.';
+  } else if(total>=26){ result='Qualified — with +5% down or +0.25% rate'; cls='win'; note='Solid profile. Sellers typically offset the remaining risk with a slightly larger down payment or small rate bump.';
+  } else if(total>=21){ result='Possible — seller approval, +10% down or +0.5% rate'; cls=''; note='Your profile goes to the seller for a case-by-case decision with strengthened terms.';
+  } else if(total>=15){ result='Borderline — seller approval, +10% down and +0.5% rate'; cls=''; note='Qualification is possible but sellers will want meaningfully stronger terms. A specialist can map the fastest path up.';
+  } else { result='Not yet'; cls='decline'; note='Below the qualification threshold today. The most common fixes: lower price target, bigger down payment, or 6+ months of documented on-time payments.'; }
+  const put=(id,val)=>document.getElementById(id).textContent=val;
+  put('q-score', autoDecline?'—':total);
+  put('q-terms', terms);
+  put('q-result', result);
+  put('q-piti', fmt(piti)+'/mo');
+  put('q-coverage', coverage.toFixed(2)+'x'+(coverage>=3?' (excellent)':coverage>=2?'':' (needs 2x+)'));
+  put('q-downpct', (downPct*100).toFixed(1)+'%');
+  put('q-resmo', resMo.toFixed(1)+' months of payments');
+  document.getElementById('q-note').textContent=note;
+  const card=document.getElementById('q-result-card');
+  card.classList.toggle('win', cls==='win');
+  card.querySelector('.big').style.color = cls==='decline' ? '#b04a3a' : (cls==='win' ? 'var(--accent-ink)' : 'var(--ink)');
+}
+document.querySelectorAll('#qualify input,#qualify select').forEach(el=>el.addEventListener('input',qualify));
+
+/* ================= MARKETPLACE ================= */
+const LISTINGS=[
+  {id:1, price:1850000, addr:'Pasadena — 3bd/2ba Craftsman', lat:34.147, lng:-118.144, down:15, rate:6.25, term:20},
+  {id:2, price:2400000, addr:'Walnut Creek — 4bd/3ba on ½ acre', lat:37.906, lng:-122.065, down:20, rate:6.0, term:15},
+  {id:3, price:975000, addr:'Sacramento — 3bd/2ba ranch', lat:38.582, lng:-121.494, down:10, rate:6.75, term:15},
+  {id:4, price:1450000, addr:'San Diego (Clairemont) — 4bd/2ba', lat:32.833, lng:-117.183, down:15, rate:6.5, term:20},
+  {id:5, price:3100000, addr:'Los Altos — 3bd/2ba mid-century', lat:37.385, lng:-122.114, down:25, rate:5.75, term:10},
+  {id:6, price:820000, addr:'Fresno — 4bd/3ba with ADU', lat:36.746, lng:-119.772, down:10, rate:7.0, term:20},
+  {id:7, price:1250000, addr:'Long Beach — 3bd/2ba Spanish', lat:33.77, lng:-118.19, down:15, rate:6.5, term:15},
+  {id:8, price:2750000, addr:'Santa Barbara — 3bd/3ba near mesa', lat:34.42, lng:-119.7, down:20, rate:6.0, term:20}
+];
+let map=null, markers=[];
+function initMap(){
+  if(map){map.invalidateSize();return}
+  map=L.map('map',{scrollWheelZoom:false}).setView([36.3,-119.6],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  renderListings();
+}
+function renderListings(){
+  const maxP=+document.getElementById('f-price').value||Infinity;
+  const maxD=+document.getElementById('f-down').value;
+  const minT=+document.getElementById('f-term').value;
+  const list=LISTINGS.filter(l=>l.price<=maxP&&l.down<=maxD&&l.term>=minT);
+  const el=document.getElementById('listings');
+  el.innerHTML=list.length?'':'<p style="color:var(--muted);padding:10px;font-size:.85rem">No listings match those filters.</p>';
+  markers.forEach(m=>map&&map.removeLayer(m)); markers=[];
+  list.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='listing';
+    d.innerHTML=`<div class="price">${fmt(l.price)}</div><div class="addr">${l.addr}</div>
+      <div class="terms"><span class="pill">${l.down}% down</span><span class="pill">${l.rate}%</span><span class="pill">${l.term} yr</span><span class="pill g">Free &amp; clear</span></div>`;
+    d.onclick=()=>{map.setView([l.lat,l.lng],11);document.querySelectorAll('.listing').forEach(x=>x.classList.remove('active'));d.classList.add('active')};
+    el.appendChild(d);
+    if(map){
+      const icon=L.divIcon({className:'',html:'<div style="width:14px;height:14px;border-radius:50%;background:#00c887;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.35)"></div>',iconSize:[14,14]});
+      const m=L.marker([l.lat,l.lng],{icon}).addTo(map).bindPopup(`<b>${fmt(l.price)}</b><br>${l.addr}<br>${l.down}% down · ${l.rate}% · ${l.term} yrs`);
+      m.on('click',()=>{document.querySelectorAll('.listing').forEach(x=>x.classList.remove('active'));d.classList.add('active');d.scrollIntoView({behavior:'smooth',block:'nearest'})});
+      markers.push(m);
+    }
+  });
+}
+
+/* ================= AI CHAT ================= */
+const CANNED=[
+  [/453|installment/i,"An installment sale (IRC §453) lets you recognize capital gain proportionally as principal payments arrive, instead of all at once. Each payment is part tax-free return of basis, part gain at capital-gains rates, plus interest (ordinary income) — reported on Form 6252. Spreading gain over 10–20 years often keeps you in the 0%/15% federal bracket and lower CA brackets. (Education, not tax advice.)"],
+  [/default|stop|stops paying|foreclos/i,"Your note is secured by a recorded deed of trust — the same instrument banks use. If the buyer defaults, you foreclose (non-judicial in California, typically 4–6 months), keep every payment received including the down payment, and take the property back. That's why buyer screening and a meaningful down payment matter."],
+  [/step.?up|basis|inherit|heir/i,"Honest answer: yes, that's the trade-off. Holding until death gives heirs a stepped-up basis (§1014) — zero capital gains. An installment sale recognizes gain as you collect, and remaining payments pass to heirs as income in respect of a decedent. If you want or need to sell during your lifetime, the installment sale is usually the most tax-efficient path. Model both with your CPA."],
+  [/legal|dodd|licens/i,"Yes. Installment sales are IRC §453, in the tax code since 1928. Dodd-Frank expressly allows individuals to seller-finance up to 3 properties per year without a mortgage originator license. Every deal here closes through licensed escrow and title with a recorded deed of trust."],
+  [/rate|interest|afr|charge/i,"The note must carry at least the IRS Applicable Federal Rate (AFR) to avoid imputed-interest rules. Market seller-financed rates typically run 5.5–7.5%. That interest goes to you instead of a bank — on money that would otherwise have gone to the IRS in year one."],
+  [/early|money out|liquidity|sell my note|lump/i,"Two exits: the buyer can refinance later and pay off your note (you recognize the remaining gain then), or you can sell your performing note on the secondary market — seasoned, well-documented notes typically fetch 85–95% of remaining balance. Partial sales are possible too."],
+  [/fee|cost|charge|commission|price/i,"A flat closing fee, typically 1.5–2% of sale price — versus 5–6% traditional agent commissions — plus optional note servicing. Buyers pay a one-time qualification fee. No hidden spreads."],
+  [/niit|3\.8/i,"The 3.8% Net Investment Income Tax kicks in above $200k (single) / $250k (married) MAGI. A lump-sum gain almost always triggers it; spreading gain over years often keeps you under the threshold entirely."],
+  [/call|talk|human|person|specialist/i,"Happy to connect you — click 'Book a 10-min call' and pick a slot. A specialist will walk your exact numbers, no pressure."]
+];
+function addMsg(cls,text){
+  const d=document.createElement('div');d.className='msg '+cls;d.textContent=text;
+  const log=document.getElementById('chat-log');log.appendChild(d);log.scrollTop=log.scrollHeight;
+  return d;
+}
+function askChip(el){
+  document.getElementById('chat-in').value=el.textContent;
+  sendChat();
+  document.getElementById('chat-in').focus();
+}
+async function sendChat(){
+  const inp=document.getElementById('chat-in');
+  const q=inp.value.trim(); if(!q)return;
+  addMsg('user',q); inp.value='';
+  const typing=addMsg('bot typing','thinking…');
+  let reply=null;
+  try{
+    const r=await fetch('/api/assistant',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q})});
+    if(r.ok){const j=await r.json(); reply=j.reply||null}
+  }catch(e){}
+  if(!reply){
+    const hit=CANNED.find(([re])=>re.test(q));
+    reply = hit?hit[1]:"I don't have a canned answer for that yet (live AI connects when the backend is deployed). Try the suggested questions — or book a free 10-min call and a specialist will answer anything. Remember: education, not tax advice!";
+  }
+  await new Promise(res=>setTimeout(res,450));
+  typing.classList.remove('typing');
+  typing.textContent=reply;
+}
+setTimeout(()=>addMsg('bot',"Hi! Ask me anything about seller financing — taxes, risk, legality, your scenario. Tap a question on the left to start."),600);
+
+/* ================= BOOKING ================= */
+let selDay=null, selTime=null;
+function openBook(){
+  document.getElementById('book-modal').classList.add('open');
+  buildSlots();
+}
+function closeBook(){document.getElementById('book-modal').classList.remove('open')}
+function buildSlots(){
+  const daysEl=document.getElementById('book-days');
+  if(daysEl.children.length) return;
+  const days=[]; let d=new Date();
+  while(days.length<5){ d=new Date(d.getTime()+86400000); const wd=d.getDay(); if(wd!==0&&wd!==6) days.push(new Date(d)); }
+  days.forEach((day,i)=>{
+    const b=document.createElement('div');b.className='slot';
+    b.textContent=day.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    b.onclick=()=>{selDay=day.toDateString();document.querySelectorAll('#book-days .slot').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};
+    if(i===0){b.classList.add('sel');selDay=day.toDateString()}
+    daysEl.appendChild(b);
+  });
+  const timesEl=document.getElementById('book-times');
+  ['9:00 AM','10:30 AM','1:00 PM','3:30 PM','4:15 PM','5:00 PM','5:45 PM','6:30 PM'].forEach((t,i)=>{
+    const b=document.createElement('div');b.className='slot';b.textContent=t;
+    b.onclick=()=>{selTime=t;document.querySelectorAll('#book-times .slot').forEach(x=>x.classList.remove('sel'));b.classList.add('sel')};
+    if(i===1){b.classList.add('sel');selTime=t}
+    timesEl.appendChild(b);
+  });
+}
+async function submitBooking(){
+  const email=document.getElementById('book-email').value.trim();
+  const name=document.getElementById('book-name').value.trim();
+  const msg=document.getElementById('book-msg');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){msg.textContent='Please enter a valid email.';msg.style.color='#b04a3a';return}
+  try{
+    await fetch('/api/bookings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,name,day:selDay,time:selTime})});
+  }catch(e){}
+  msg.style.color='var(--accent-ink)';
+  msg.textContent=`✓ Booked — ${selDay}, ${selTime}. Confirmation sent to ${email}.`;
+  setTimeout(closeBook,2600);
+}
+
+/* ================= ANIMATIONS ================= */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+}),{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+// animated counters
+function animateCount(el){
+  const target=+el.dataset.count, pre=el.dataset.prefix||'', suf=el.dataset.suffix||'';
+  const dur=1300, t0=performance.now();
+  function tick(t){
+    const p=Math.min(1,(t-t0)/dur), eased=1-Math.pow(1-p,3);
+    el.textContent=pre+Math.round(target*eased)+suf;
+    if(p<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+const io2=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){animateCount(e.target);io2.unobserve(e.target)}
+}),{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>io2.observe(el));
+
+// lazy-init map when scrolled into view
+const io3=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){initMap();io3.unobserve(e.target)}
+}),{threshold:.05});
+io3.observe(document.getElementById('map'));
+
+calc();
+qualify();
+</script>
+</body>
+</html>
