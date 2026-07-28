@@ -1,5 +1,5 @@
 /**
- * LegacyBridge — Cloudflare Worker backend
+ * BankFree — Cloudflare Worker backend
  *
  * Routes:
  *   GET  /api/listings   → listings JSON (KV-backed, falls back to seed data)
@@ -18,7 +18,7 @@ const SEED_LISTINGS = [
   { id: 2, price: 2400000, addr: 'Walnut Creek, CA — 4bd/3ba on ½ acre', lat: 37.906, lng: -122.065, down: 20, rate: 6.0, term: 15 },
 ];
 
-const SYSTEM_PROMPT = `You are the LegacyBridge assistant. LegacyBridge is a marketplace connecting
+const SYSTEM_PROMPT = `You are the BankFree assistant. BankFree is a marketplace connecting
 homeowners (often 60+, with free-and-clear, highly appreciated homes) to qualified buyers for
 seller-financed installment sales under IRC Section 453.
 
@@ -39,7 +39,7 @@ Rules:
 - ALWAYS include a brief reminder that you provide education, not tax/legal advice, and users should consult their CPA/attorney.
 - Never guarantee tax outcomes or investment returns.
 - Keep answers under 150 words unless asked for detail.
-- LegacyBridge is a marketplace, NOT a lender — never imply it originates or funds loans.`;
+- BankFree is a marketplace, NOT a lender — never imply it originates or funds loans.`;
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
