@@ -83,29 +83,29 @@ section{padding:88px 0}
 .step svg{width:36px;height:36px;stroke:var(--lb-ink);stroke-width:1.4;fill:none;margin-bottom:16px}
 
 /* EXAMPLE */
-.example{background:var(--lb-dark);color:#eef4f0;border-radius:28px;margin:0 24px}
+.example{background:linear-gradient(165deg,#fffefb 0%,#f5efe0 100%);color:var(--lb-ink);border:1px solid rgba(194,163,91,.35);border-radius:28px;margin:0 24px;box-shadow:var(--lb-shadow)}
 .example .wrap{padding-top:80px;padding-bottom:80px}
-.example .kicker{color:var(--lb-accent)}
-.example h2{color:#fff}
-.example .sec-head p{color:#a89f8a}
+.example .kicker{color:var(--lb-accent-ink)}
+.example h2{color:var(--lb-ink)}
+.example .sec-head p{color:var(--lb-muted)}
 .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:0;align-items:stretch;margin-bottom:40px}
 @media(max-width:820px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg);margin:6px auto}}
-.fcard{background:var(--lb-dark-soft);border:1px solid var(--lb-dark-line);border-radius:var(--lb-r);padding:26px}
-.fcard .t{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#93876c;margin-bottom:10px}
+.fcard{background:rgba(255,255,255,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(194,163,91,.3);border-radius:var(--lb-r);padding:26px;box-shadow:0 1px 2px rgba(21,18,11,.03)}
+.fcard .t{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--lb-accent-ink);margin-bottom:10px}
 .fcard b{font-size:1.35rem;letter-spacing:-.02em}
-.fcard p{font-size:.84rem;color:#a89f8a;margin-top:8px}
+.fcard p{font-size:.84rem;color:var(--lb-muted);margin-top:8px}
 .arrow{display:flex;align-items:center;justify-content:center;color:var(--lb-accent);font-size:1.4rem;padding:0 16px}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
 @media(max-width:680px){.vs{grid-template-columns:1fr}}
-.vs-card{border-radius:var(--lb-r);padding:28px;border:1px solid var(--lb-dark-line)}
-.vs-card.a{background:var(--lb-dark-soft)}
-.vs-card.b{background:linear-gradient(160deg,rgba(194,163,91,.14),rgba(138,109,43,.07));border-color:rgba(194,163,91,.35)}
-.vs-card h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:#a89f8a;margin-bottom:16px}
+.vs-card{border-radius:var(--lb-r);padding:28px;border:1px solid rgba(194,163,91,.28);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.vs-card.a{background:rgba(255,255,255,.55)}
+.vs-card.b{background:linear-gradient(160deg,rgba(194,163,91,.18),rgba(255,255,255,.5));border-color:rgba(194,163,91,.5)}
+.vs-card h4{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--lb-muted);margin-bottom:16px}
 .vs-card .big{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:4px}
-.vs-card.b .big{color:var(--lb-accent)}
-.vs-card small{color:#a89f8a}
-.vs-row{display:flex;justify-content:space-between;font-size:.86rem;padding:9px 0;border-bottom:1px dashed var(--lb-dark-line);color:#cfc6b0}
-.vs-row b{font-variant-numeric:tabular-nums;color:#fff}
+.vs-card.b .big{color:var(--lb-accent-ink)}
+.vs-card small{color:var(--lb-muted)}
+.vs-row{display:flex;justify-content:space-between;font-size:.86rem;padding:9px 0;border-bottom:1px dashed rgba(194,163,91,.35);color:var(--lb-muted)}
+.vs-row b{font-variant-numeric:tabular-nums;color:var(--lb-ink)}
 .example .cta-line{text-align:center;margin-top:40px}
 
 /* CALCULATOR */
@@ -119,9 +119,9 @@ section{padding:88px 0}
 .field input:focus,.field select:focus{outline:none;border-color:var(--lb-accent)}
 .field .hint{font-size:.72rem;color:#a29a86;margin-top:3px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.delta{background:var(--lb-dark);color:#fff;border-radius:var(--lb-r);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
-.delta .amt{font-size:1.9rem;font-weight:700;letter-spacing:-.03em;color:var(--lb-accent)}
-.delta small{color:#a89f8a;display:block;font-size:.78rem}
+.delta{background:linear-gradient(150deg,#fffdf7,#f5eedd);color:var(--lb-ink);border:1.5px solid rgba(194,163,91,.5);box-shadow:var(--lb-shadow);border-radius:var(--lb-r);padding:22px 26px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.delta .amt{font-size:1.9rem;font-weight:700;letter-spacing:-.03em;color:var(--lb-accent-ink)}
+.delta small{color:var(--lb-muted);display:block;font-size:.78rem}
 .results{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:560px){.results{grid-template-columns:1fr}}
 .rcard{background:#fff;border:1px solid var(--lb-line);border-radius:var(--lb-r);padding:24px;box-shadow:var(--lb-shadow);position:relative}
@@ -134,8 +134,8 @@ section{padding:88px 0}
 .tag{position:absolute;top:-10px;right:16px;background:var(--lb-accent);color:#2a2210;font-size:.68rem;font-weight:700;padding:3px 12px;border-radius:100px;letter-spacing:.05em}
 .offset{margin-top:16px;background:var(--lb-accent-soft);border:1px solid rgba(194,163,91,.4);border-radius:12px;padding:12px 15px;font-size:.82rem;line-height:1.55;color:var(--lb-accent-ink)}
 .offset b{font-weight:750}
-.offset-dark{background:rgba(194,163,91,.1);border-color:rgba(194,163,91,.3);color:#d8c795}
-.offset-dark b{color:var(--lb-accent)}
+.offset-dark{background:var(--lb-accent-soft);border-color:rgba(194,163,91,.5);color:var(--lb-accent-ink)}
+.offset-dark b{color:var(--lb-accent-ink)}
 .chart-box{background:#fff;border:1px solid var(--lb-line);border-radius:var(--lb-r);padding:22px;box-shadow:var(--lb-shadow)}
 .chart-title{font-size:.78rem;text-transform:uppercase;letter-spacing:.1em;color:var(--lb-muted);margin-bottom:14px;font-weight:600}
 #chart svg{width:100%;height:auto;display:block}
@@ -498,7 +498,7 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
       </div>
       <div class="lbrv lbd1">
         <div class="delta">
-          <div><small>Qualification score</small><div class="amt"><span id="q-score">—</span><span style="font-size:1rem;color:#a89f8a"> / 35</span></div></div>
+          <div><small>Qualification score</small><div class="amt"><span id="q-score">—</span><span style="font-size:1rem;color:var(--lb-muted)"> / 35</span></div></div>
           <div style="text-align:right"><small>Assumed note terms</small><div style="font-size:.9rem;font-weight:600" id="q-terms">—</div></div>
         </div>
         <div class="rcard" id="q-result-card">
@@ -540,10 +540,10 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
         <div class="vs-card a">
           <h4>Your numbers</h4>
           <div class="row2" style="margin-bottom:14px">
-            <div class="field" style="margin-bottom:0"><label style="color:#a89f8a">Avg. home price in your market</label><input type="number" id="a-price" value="1200000" step="50000" style="background:#15120b;border-color:rgba(255,255,255,.15);color:#fff"></div>
-            <div class="field" style="margin-bottom:0"><label style="color:#a89f8a">Your listing commission %</label><input type="number" id="a-comm" value="1.25" step="0.25" min="0.25" max="6" style="background:#15120b;border-color:rgba(255,255,255,.15);color:#fff"><div class="hint" style="color:#93876c">You set your own rate</div></div>
+            <div class="field" style="margin-bottom:0"><label>Avg. home price in your market</label><input type="number" id="a-price" value="1200000" step="50000"></div>
+            <div class="field" style="margin-bottom:0"><label>Your listing commission %</label><input type="number" id="a-comm" value="1.25" step="0.25" min="0.25" max="6"><div class="hint">You set your own rate</div></div>
           </div>
-          <div class="field"><label style="color:#a89f8a">"Won't sell — taxes" clients you could rescue per year: <b id="a-deals-label" style="color:#fff">3</b></label>
+          <div class="field"><label>"Won't sell — taxes" clients you could rescue per year: <b id="a-deals-label">3</b></label>
           <input type="range" id="a-deals" min="1" max="10" value="3" style="width:100%;accent-color:#C2A35B"></div>
           <div class="vs-row"><span>Listing commission (your rate)</span><b id="a-listing">—</b></div>
           <div class="vs-row"><span>Referral share (25% of platform fee)</span><b id="a-referral">—</b></div>
@@ -551,7 +551,7 @@ footer a{color:var(--lb-muted);text-decoration:none;margin-left:18px}
         <div class="vs-card b">
           <h4>Incremental income per year</h4>
           <div class="big" id="a-total">—</div>
-          <small>from leads that today earn you <b style="color:#fff">$0</b></small>
+          <small>from leads that today earn you <b>$0</b></small>
           <div style="margin-top:16px">
             <div class="vs-row"><span>Co-branded tax calculator</span><b>included</b></div>
             <div class="vs-row"><span>Deal structuring &amp; docs</span><b>we handle it</b></div>
